@@ -1,0 +1,139 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Rol {
+  ADMINISTRADOR
+  CLIENTE
+  MODERADOR
+}
+
+enum PedidoEstado {
+  PAGADO
+  PENDIENTE
+}
+
+model Usuario {
+  id            Int             @id @default(autoincrement())
+  email         String          @unique
+  nombre        String
+  apellido      String
+  password      String
+  rol           Rol
+  Administrador Administrador[]
+  Cliente       Cliente[]
+  Moderador     Moderador[]
+  Vendedor      Vendedor[]
+}
+
+model Vendedor {
+  id        Int        @id @default(autoincrement())
+  usuario   Usuario    @relation(fields: [usuarioId], references: [id])
+  usuarioId Int
+  productos Producto[]
+}
+
+model Categoria {
+  id          Int        @id @default(autoincrement())
+  nombre      String
+  descripcion String?
+  productos   Producto[]
+}
+
+model Producto {
+  id           Int                 @id @default(autoincrement())
+  vendedor     Vendedor            @relation(fields: [vendedorId], references: [id])
+  vendedorId   Int
+  nombre       String
+  descripcion  String
+  precio       Float
+  stock        Int
+  imagen       String?
+  fechaAlta    DateTime
+  vecesVendido Int                 @default(0)
+  categoria    Categoria           @relation(fields: [categoriaId], references: [id])
+  categoriaId  Int
+  resenas      Resena[]
+  descuentos   Descuento[]
+  carritos     Carrito[]
+}
+
+
+model Carrito {
+  id        Int                 @id @default(autoincrement())
+  cantidad  Int
+  productos Producto[]
+  cliente   Cliente             @relation(fields: [clienteId], references: [id])
+  clienteId Int
+}
+
+model Resena {
+  id           Int      @id @default(autoincrement())
+  cliente      Cliente  @relation(fields: [clienteId], references: [id])
+  clienteId    Int
+  producto     Producto @relation(fields: [productoId], references: [id])
+  productoId   Int
+  calificacion Int
+  comentario   String
+  fecha        DateTime
+}
+
+model Administrador {
+  id        Int     @id @default(autoincrement())
+  usuario   Usuario @relation(fields: [usuarioId], references: [id])
+  usuarioId Int
+  // campos especificos para administrador
+}
+
+model Cliente {
+  id            Int       @id @default(autoincrement())
+  usuario       Usuario   @relation(fields: [usuarioId], references: [id])
+  usuarioId     Int
+  direccion     String
+  telefono      String
+  fechaRegistro DateTime
+  resenas       Resena[]
+  pedidos       Pedido[]
+  carritos      Carrito[]
+}
+
+model Pedido {
+  id        Int          @id @default(autoincrement())
+  cliente   Cliente      @relation(fields: [clienteId], references: [id])
+  clienteId Int
+  fecha     DateTime
+  estado    PedidoEstado
+}
+
+model Moderador {
+  id        Int       @id @default(autoincrement())
+  usuario   Usuario   @relation(fields: [usuarioId], references: [id])
+  usuarioId Int
+  reportes  Reporte[]
+}
+
+model Reporte {
+  id          Int       @id @default(autoincrement())
+  descripcion String
+  fecha       DateTime
+  moderador   Moderador @relation(fields: [moderadorId], references: [id])
+  moderadorId Int
+}
+
+model Descuento {
+  id          Int      @id @default(autoincrement())
+  producto    Producto @relation(fields: [productoId], references: [id])
+  productoId  Int
+  codigo      String
+  porcentaje  Int
+  fechaInicio DateTime
+  fechaFin    DateTime
+}
