@@ -14,6 +14,7 @@ enum Rol {
   ADMINISTRADOR
   CLIENTE
   MODERADOR
+  VENDEDOR
 }
 
 enum PedidoEstado {
@@ -28,10 +29,38 @@ model Usuario {
   apellido      String
   password      String
   rol           Rol
+  tieneCliente  Boolean         @default(false)
+  googleId      String?
   Administrador Administrador[]
   Cliente       Cliente[]
   Moderador     Moderador[]
   Vendedor      Vendedor[]
+}
+
+model Moderador {
+  id        Int       @id @default(autoincrement())
+  usuario   Usuario   @relation(fields: [usuarioId], references: [id])
+  usuarioId Int
+  reportes  Reporte[]
+}
+
+model Cliente {
+  id            Int       @id @default(autoincrement())
+  usuario       Usuario   @relation(fields: [usuarioId], references: [id])
+  usuarioId     Int
+  direccion     String?
+  telefono      String?
+  fechaRegistro DateTime  @default(now())
+  resenas       Resena[]
+  pedidos       Pedido[]
+  carritos      Carrito[]
+}
+
+model Administrador {
+  id        Int     @id @default(autoincrement())
+  usuario   Usuario @relation(fields: [usuarioId], references: [id])
+  usuarioId Int
+  // campos especificos para administrador
 }
 
 model Vendedor {
@@ -44,13 +73,15 @@ model Vendedor {
 model Categoria {
   id          Int        @id @default(autoincrement())
   nombre      String
+  popular     Boolean    @default(false)
+  imagen      String?
   descripcion String?
   productos   Producto[]
 }
 
 model Producto {
-  id           Int                 @id @default(autoincrement())
-  vendedor     Vendedor            @relation(fields: [vendedorId], references: [id])
+  id           Int         @id @default(autoincrement())
+  vendedor     Vendedor    @relation(fields: [vendedorId], references: [id])
   vendedorId   Int
   nombre       String
   descripcion  String
@@ -58,20 +89,19 @@ model Producto {
   stock        Int
   imagen       String?
   fechaAlta    DateTime
-  vecesVendido Int                 @default(0)
-  categoria    Categoria           @relation(fields: [categoriaId], references: [id])
+  vecesVendido Int         @default(0)
+  categoria    Categoria   @relation(fields: [categoriaId], references: [id])
   categoriaId  Int
   resenas      Resena[]
   descuentos   Descuento[]
   carritos     Carrito[]
 }
 
-
 model Carrito {
-  id        Int                 @id @default(autoincrement())
+  id        Int        @id @default(autoincrement())
   cantidad  Int
   productos Producto[]
-  cliente   Cliente             @relation(fields: [clienteId], references: [id])
+  cliente   Cliente    @relation(fields: [clienteId], references: [id])
   clienteId Int
 }
 
@@ -81,49 +111,23 @@ model Resena {
   clienteId    Int
   producto     Producto @relation(fields: [productoId], references: [id])
   productoId   Int
-  calificacion Int
-  comentario   String
-  fecha        DateTime
-}
-
-model Administrador {
-  id        Int     @id @default(autoincrement())
-  usuario   Usuario @relation(fields: [usuarioId], references: [id])
-  usuarioId Int
-  // campos especificos para administrador
-}
-
-model Cliente {
-  id            Int       @id @default(autoincrement())
-  usuario       Usuario   @relation(fields: [usuarioId], references: [id])
-  usuarioId     Int
-  direccion     String
-  telefono      String
-  fechaRegistro DateTime
-  resenas       Resena[]
-  pedidos       Pedido[]
-  carritos      Carrito[]
+  calificacion Int?
+  comentario   String?
+  fecha        DateTime @default(now())
 }
 
 model Pedido {
   id        Int          @id @default(autoincrement())
   cliente   Cliente      @relation(fields: [clienteId], references: [id])
   clienteId Int
-  fecha     DateTime
+  fecha     DateTime     @default(now())
   estado    PedidoEstado
-}
-
-model Moderador {
-  id        Int       @id @default(autoincrement())
-  usuario   Usuario   @relation(fields: [usuarioId], references: [id])
-  usuarioId Int
-  reportes  Reporte[]
 }
 
 model Reporte {
   id          Int       @id @default(autoincrement())
   descripcion String
-  fecha       DateTime
+  fecha       DateTime  @default(now())
   moderador   Moderador @relation(fields: [moderadorId], references: [id])
   moderadorId Int
 }

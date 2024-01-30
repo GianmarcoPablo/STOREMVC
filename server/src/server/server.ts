@@ -1,5 +1,9 @@
 import express, { Router } from 'express';
 import path from 'path';
+import cors from 'cors';
+import passport from "passport"
+import { googleAuthEstragegy } from '../services/passportAuth';
+import session from 'express-session';
 
 interface Options {
     port: number;
@@ -29,9 +33,23 @@ export class Server {
 
 
         //* Middlewares
+        this.app.use(cors({
+            origin: true,
+            credentials: true,
+            
+        }))
         this.app.use(express.json()); // raw
         this.app.use(express.urlencoded({ extended: true })); // x-www-form-urlencoded
 
+        this.app.use(session({
+            secret: "secret",
+            resave: false,
+            saveUninitialized: false,
+        }));
+
+        this.app.use(passport.initialize());
+        this.app.use(passport.session());
+        passport.use(googleAuthEstragegy);
         //* Public Folder
         this.app.use(express.static(this.publicPath));
 
@@ -46,7 +64,7 @@ export class Server {
 
 
         this.serverListener = this.app.listen(this.port, () => {
-            console.log(`Server running on port ${this.port}`);
+            console.log(`Server listening on port http://localhost:${this.port}`)
         });
 
     }
