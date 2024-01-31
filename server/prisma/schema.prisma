@@ -23,31 +23,31 @@ enum PedidoEstado {
 }
 
 model Usuario {
-  id            Int             @id @default(autoincrement())
-  email         String          @unique
+  id            Int            @id @default(autoincrement())
+  email         String         @unique
   nombre        String
   apellido      String
   password      String
   rol           Rol
-  tieneCliente  Boolean         @default(false)
+  tieneCliente  Boolean        @default(false)
   googleId      String?
-  Administrador Administrador[]
-  Cliente       Cliente[]
-  Moderador     Moderador[]
-  Vendedor      Vendedor[]
+  Administrador Administrador?
+  Cliente       Cliente?
+  Moderador     Moderador?
+  Vendedor      Vendedor?
 }
 
 model Moderador {
   id        Int       @id @default(autoincrement())
   usuario   Usuario   @relation(fields: [usuarioId], references: [id])
-  usuarioId Int
+  usuarioId Int       @unique
   reportes  Reporte[]
 }
 
 model Cliente {
   id            Int       @id @default(autoincrement())
   usuario       Usuario   @relation(fields: [usuarioId], references: [id])
-  usuarioId     Int
+  usuarioId     Int       @unique
   direccion     String?
   telefono      String?
   fechaRegistro DateTime  @default(now())
@@ -57,44 +57,52 @@ model Cliente {
 }
 
 model Administrador {
-  id        Int     @id @default(autoincrement())
-  usuario   Usuario @relation(fields: [usuarioId], references: [id])
-  usuarioId Int
-  // campos especificos para administrador
+  id        Int         @id @default(autoincrement())
+  usuario   Usuario     @relation(fields: [usuarioId], references: [id])
+  usuarioId Int         @unique
+  productos Producto[]
+  categoria Categoria[]
 }
 
 model Vendedor {
-  id        Int        @id @default(autoincrement())
-  usuario   Usuario    @relation(fields: [usuarioId], references: [id])
-  usuarioId Int
+  id        Int         @id @default(autoincrement())
+  usuario   Usuario     @relation(fields: [usuarioId], references: [id])
+  usuarioId Int         @unique
   productos Producto[]
+  categoria Categoria[]
 }
 
 model Categoria {
-  id          Int        @id @default(autoincrement())
-  nombre      String
-  popular     Boolean    @default(false)
-  imagen      String?
-  descripcion String?
-  productos   Producto[]
+  id              Int            @id @default(autoincrement())
+  nombre          String
+  popular         Boolean        @default(false)
+  imagen          String?
+  descripcion     String?
+  productos       Producto[]
+  vendedor        Vendedor?      @relation(fields: [vendedorId], references: [id])
+  vendedorId      Int?
+  administrador   Administrador? @relation(fields: [administradorId], references: [id])
+  administradorId Int?
 }
 
 model Producto {
-  id           Int         @id @default(autoincrement())
-  vendedor     Vendedor    @relation(fields: [vendedorId], references: [id])
-  vendedorId   Int
-  nombre       String
-  descripcion  String
-  precio       Float
-  stock        Int
-  imagen       String?
-  fechaAlta    DateTime
-  vecesVendido Int         @default(0)
-  categoria    Categoria   @relation(fields: [categoriaId], references: [id])
-  categoriaId  Int
-  resenas      Resena[]
-  descuentos   Descuento[]
-  carritos     Carrito[]
+  id              Int            @id @default(autoincrement())
+  vendedor        Vendedor?      @relation(fields: [vendedorId], references: [id])
+  vendedorId      Int?
+  administrador   Administrador? @relation(fields: [administradorId], references: [id])
+  administradorId Int?
+  nombre          String
+  descripcion     String
+  precio          Float
+  stock           Int
+  imagen          String?
+  fechaAlta       DateTime
+  vecesVendido    Int            @default(0)
+  categoria       Categoria      @relation(fields: [categoriaId], references: [id])
+  categoriaId     Int
+  resenas         Resena[]
+  descuentos      Descuento[]
+  carritos        Carrito[]
 }
 
 model Carrito {

@@ -20,7 +20,7 @@ export class AuthRoutes {
         router.get("/google/callback", passport.authenticate("google", {
             failureRedirect: "/api/v1/auth/google/failure",
         }), async (req, res) => {
-            const user = req.user as User;
+            const user = req.user as User
             console.log(user);
             const token = await new JwtAdapter(envs.JWT_SEED).generateToken({ id: user.id });
             return res.json({ user, token });

@@ -17,7 +17,7 @@ export class RegisterDto {
         if (!email) return ["Email es requerido"]
         if (!password) return ["Password es requerido"]
         if (!rol) return ["Rol es requerido"]
-        const rolesValidos = [Rol.ADMINISTRADOR, Rol.CLIENTE, Rol.MODERADOR]
+        const rolesValidos = [Rol.ADMINISTRADOR, Rol.CLIENTE, Rol.MODERADOR, Rol.VENDEDOR]
         if (!rolesValidos.includes(rol)) return [`El rol ${rol} no es valido los roles validos son ${rolesValidos.join(", ")}`]
 
         return [undefined, new RegisterDto(nombre, apellido, email, password, rol)]
